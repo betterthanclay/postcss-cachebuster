@@ -1,7 +1,8 @@
 {
   "name": "postcss-cachebuster",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "Cachebusting all local files in css",
+  "type": "module",
   "keywords": [
     "postcss",
     "css",
@@ -25,25 +26,26 @@
   },
   "homepage": "https://github.com/glebmachine/postcss-cachebuster",
   "dependencies": {
-    "canonical-path": "0.0.2",
-    "chalk": "^1.1.1",
-    "path": "^0.12.7",
-    "postcss": "^5.0.12"
+    "canonical-path": "^1.0.0",
+    "chalk": "^5.3.0",
+    "path": "^0.12.7"
   },
   "devDependencies": {
     "chai": "^4.0",
-    "sinon": "^4.0",
-    "sinon-chai": "^3.0",
-    "eslint": "2.13.1",
-    "eslint-config-airbnb": "9.0.1",
-    "eslint-plugin-import": "1.9.2",
-    "eslint-watch": "2.1.11",
-    "git-hooks": "1.0.2",
-    "gulp": "3.9.0",
-    "gulp-eslint": "0.14.0",
-    "gulp-mocha": "2.1.2",
-    "gulp-postcss": "6.0.1",
-    "gulp-rename": "1.2.2"
+    "eslint": "^7.32",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-watch": "^7.0.0",
+    "gulp": "^5.0.0",
+    "gulp-eslint": "^6.0.0",
+    "gulp-mocha": "^10.0.1",
+    "gulp-postcss": "^10.0.0",
+    "gulp-rename": "^2.0.0",
+    "sinon": "^18.0",
+    "sinon-chai": "^3.7"
+  },
+  "peerDependencies": {
+    "postcss": "^8.4.31"
   },
   "scripts": {
     "lint": "eslint --fix index.js",

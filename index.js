@@ -1,14 +1,13 @@
-var url = require('url');
-var fs = require('fs');
-var crypto = require('crypto');
-var chalk = require('chalk');
-
-var postcss = require('postcss');
-var path = require('canonical-path');
+import url from 'url';
+import fs from 'fs';
+import crypto from 'crypto';
+import chalk from 'chalk';
+import postcss from 'postcss';
+import path from 'canonical-path';
 
 var checksums = {};
 
-module.exports = postcss.plugin('postcss-cachebuster', function (opts) {
+export default (opts = {}) => {
   var pattern = /url\(('|")?([^'"\)]+)('|")?\)/g;
   var supportedProps = [
     'background',
@@ -20,7 +19,7 @@ module.exports = postcss.plugin('postcss-cachebuster', function (opts) {
 
   opts = opts || {};
   opts.imagesPathResolved = opts.imagesPath ? process.cwd() + opts.imagesPath : process.cwd();
-  opts.cssPathResolved = opts.cssPath ? process.cwd()+opts.cssPath : false;
+  opts.cssPathResolved = opts.cssPath ? process.cwd() + opts.cssPath : false;
   opts.type = opts.type || 'mtime';
   opts.paramName = opts.paramName || 'v';
   opts.hashAlgorithm = opts.hashAlgorithm || 'md5';
@@ -38,7 +37,7 @@ module.exports = postcss.plugin('postcss-cachebuster', function (opts) {
       // Used to distinguish between different hash algorithms among the
       // remembered checksum values in the `checksums` array.
       var checksumKey = [assetPath, opts.hashAlgorithm].join('|');
-      
+
       if (checksums[checksumKey]) {
         cachebuster = checksums[checksumKey];
       } else {
@@ -68,67 +67,70 @@ module.exports = postcss.plugin('postcss-cachebuster', function (opts) {
     return assetPath;
   }
 
-  return function (css) {
-    var inputFile = opts.cssPathResolved || css.source.input.file || '';
+  return {
+    postcssPlugin: 'postcss-cachebuster',
+    Once(css, { result }) {
+      var inputFile = opts.cssPathResolved || css.source.input.file || '';
 
-    function updateAssetUrl(assetUrl) {
-      var assetPath = resolveUrl(assetUrl, inputFile, opts.imagesPathResolved);
+      function updateAssetUrl(assetUrl) {
+        var assetPath = resolveUrl(assetUrl, inputFile, opts.imagesPathResolved);
 
-      // complete url with cachebuster
-      var cachebuster = createCachebuster(assetPath, assetUrl.pathname, opts.type);
-      if (!cachebuster) {
-        return;
-      } else if (typeof opts.type === 'function') {
-        assetUrl.pathname = cachebuster;
-      } else if (assetUrl.search && assetUrl.search.length > 1) {
-        assetUrl.search = assetUrl.search + '&' + opts.paramName + cachebuster;
-      } else {
-        assetUrl.search = '?' + opts.paramName + cachebuster;
-      }
-    }
-
-    css.walkAtRules('import', function walkThroughtImports(atrule) {
-      pattern.lastIndex = 0;
-      var results = pattern.exec(atrule.params);
-      var quote = results[1] || '"';
-      var originalUrl = results[2];
-
-      var assetUrl = url.parse(originalUrl);
-
-      // only locals
-      if (assetUrl.host ||
-          assetUrl.pathname.indexOf('//') === 0 ||
-          assetUrl.pathname.indexOf(';base64') !== -1) {
-        return;
+        // complete url with cachebuster
+        var cachebuster = createCachebuster(assetPath, assetUrl.pathname, opts.type);
+        if (!cachebuster) {
+          return;
+        } else if (typeof opts.type === 'function') {
+          assetUrl.pathname = cachebuster;
+        } else if (assetUrl.search && assetUrl.search.length > 1) {
+          assetUrl.search = assetUrl.search + '&' + opts.paramName + cachebuster;
+        } else {
+          assetUrl.search = '?' + opts.paramName + cachebuster;
+        }
       }
 
-      updateAssetUrl(assetUrl);
-
-      atrule.params = 'url(' + quote + url.format(assetUrl) + quote + ')';
-    });
-
-    css.walkDecls(function walkThroughtDeclarations(declaration){
-      // only image and font related declarations
-      if (supportedProps.indexOf(declaration.prop)=== -1) {
-        return;
-      }
-
-      declaration.value = declaration.value.replace(pattern, function (match, quote, originalUrl) {
-        quote = quote || '"';
+      css.walkAtRules('import', function walkThroughtImports(atrule) {
+        pattern.lastIndex = 0;
+        var results = pattern.exec(atrule.params);
+        var quote = results[1] || '"';
+        var originalUrl = results[2];
 
         var assetUrl = url.parse(originalUrl);
 
         // only locals
         if (assetUrl.host ||
-            assetUrl.pathname.indexOf('//') === 0 ||
-            assetUrl.pathname.indexOf(';base64') !== -1) {
-          return match;
+          assetUrl.pathname.indexOf('//') === 0 ||
+          assetUrl.pathname.indexOf(';base64') !== -1) {
+          return;
         }
 
         updateAssetUrl(assetUrl);
 
-        return 'url(' + quote + url.format(assetUrl) + quote + ')';
+        atrule.params = 'url(' + quote + url.format(assetUrl) + quote + ')';
       });
-    });
-  };
-});
+
+      css.walkDecls(function walkThroughtDeclarations(declaration) {
+        // only image and font related declarations
+        if (supportedProps.indexOf(declaration.prop) === -1) {
+          return;
+        }
+
+        declaration.value = declaration.value.replace(pattern, function (match, quote, originalUrl) {
+          quote = quote || '"';
+
+          var assetUrl = url.parse(originalUrl);
+
+          // only locals
+          if (assetUrl.host ||
+            assetUrl.pathname.indexOf('//') === 0 ||
+            assetUrl.pathname.indexOf(';base64') !== -1) {
+            return match;
+          }
+
+          updateAssetUrl(assetUrl);
+
+          return 'url(' + quote + url.format(assetUrl) + quote + ')';
+        });
+      });
+    }
+  }
+};
