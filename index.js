@@ -1,12 +1,11 @@
-import url from 'url';
-import fs from 'fs';
-import crypto from 'crypto';
-import chalk from 'chalk';
-import path from 'canonical-path';
+const url = require('url');
+const fs = require('fs');
+const crypto = require('crypto');
+const path = require('canonical-path');
 
 var checksums = {};
 
-export default (opts = {}) => {
+module.exports = (opts = {}) => {
   var pattern = /url\(('|")?([^'"\)]+)('|")?\)/g;
   var supportedProps = [
     'background',
@@ -31,7 +30,7 @@ export default (opts = {}) => {
     if (typeof type === 'function') {
       cachebuster = type(assetPath, origPath);
     } else if (!fs.existsSync(assetPath)) {
-      console.log('Cachebuster:', chalk.yellow('file unreachable or not exists', assetPath));
+      console.log('Cachebuster:', '\u001b[33mfile unreachable or not exists ' + assetPath + '\u001b[39m');
     } else if (type === 'checksum') {
       // Used to distinguish between different hash algorithms among the
       // remembered checksum values in the `checksums` array.
@@ -133,3 +132,5 @@ export default (opts = {}) => {
     }
   }
 };
+
+module.exports.postcss = true;
