@@ -1,8 +1,10 @@
-
 {
-  "max-len": 0,
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 6
+  },
   "rules": {
-    "indent": ["error", 2, { "VariableDeclarator": 1 }],
+    "indent": [ "error", 2, { "VariableDeclarator": 1 } ],
     "global-require": 0,
     "func-names": 0,
     "prefer-rest-params": 1,

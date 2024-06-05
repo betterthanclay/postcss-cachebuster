@@ -2,7 +2,6 @@ import url from 'url';
 import fs from 'fs';
 import crypto from 'crypto';
 import chalk from 'chalk';
-import postcss from 'postcss';
 import path from 'canonical-path';
 
 var checksums = {};
